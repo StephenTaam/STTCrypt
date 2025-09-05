@@ -5,23 +5,11 @@
     <title>Bg7++</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      /*
-      body {
-        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei",
-          "Helvetica Neue", sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #fafafa;
-        color: #2c2c2c;
-        line-height: 1.6;
-        box-sizing: border-box;
-      }
-      */
       body {
   font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
   margin: 0;
   padding: 0;
-  background: url('/html/p1.jpg') no-repeat center center fixed;
+  background: url('p1.jpg') no-repeat center center fixed;
   background-size: cover;
   color: #2c2c2c;
   line-height: 1.6;
@@ -45,11 +33,6 @@
         padding: 40px 20px;
         text-align: center;
         color: white;
-        /*
-        background-color: #ffffff; 
-        color: #222222; 
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-        */
         box-shadow: 0 4px 12px rgba(53, 122, 183, 0.5);
       }
 
@@ -92,23 +75,6 @@
         font-weight: 500;
         letter-spacing: 0.05em;
       }
-      /*
-      .welcome {
-        text-align: center;
-        margin-top: 28px;
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #444;
-      }
-
-      #view-count {
-        text-align: center;
-        font-size: 1rem;
-        margin: 14px 0 40px;
-        color: #666;
-        font-weight: 500;
-      }
-      */
       .welcome, #view-count {
   color: #fff;
   text-align: center;
@@ -348,7 +314,7 @@
       aria-label="梦想的日出之地"
       style="text-align: center"
     >
-      <img src="html/home_2.jpg" alt="梦想的日出之地" />
+      <img src="home_2.jpg" alt="梦想的日出之地" />
     </div>
 
     <div class="quote">
@@ -361,7 +327,6 @@
 
     <div class="welcome">欢迎来到我的个人主页！✨</div>
 
-    <div id="view-count">加载浏览量中...</div>
 
     <hr />
 
@@ -373,7 +338,6 @@
       <a href="/html/technology.html">计算机技术</a>
       <a href="/html/chess.html">国际象棋</a>
       <a href="/html/history.html">历史</a>
-      <a href="/html/leave_message.html">留言给我</a>
     </div>
 
     <hr />
@@ -404,9 +368,6 @@
             <li><a href="/html/history.html">📖 历史</a></li>
             <li><a href="/html/catholic.html">✝️ 天主教</a></li>
             <li><a href="/html/chess.html">♟️ 国际象棋</a></li>
-            <li>
-              <a href="/html/leave_message.html">📬 留言</a>
-            </li>
           </ul>
         </div>
         
@@ -529,24 +490,7 @@
 
       fetchArticles(currentPage);
 
-      // 加载本页浏览量
-      async function fetchPageViews() {
-        try {
-          const response = await fetch("https://139.129.21.152:5050/listPageView");
-          const data = await response.json();
-          const homeView = data.find((item) => item.path === "html/home.html");
-          if (homeView) {
-            document.getElementById("view-count").textContent = `👀博客浏览量：${homeView.view_num}`;
-          } else {
-            document.getElementById("view-count").textContent = "未找到浏览量信息";
-          }
-        } catch (error) {
-          console.error("加载浏览量失败:", error);
-          document.getElementById("view-count").textContent = "加载浏览量失败";
-        }
-      }
 
-      fetchPageViews();
 
       document.getElementById("search-form").addEventListener("submit", async function (e) {
   e.preventDefault();
@@ -588,6 +532,10 @@ document.getElementById("reset-btn").addEventListener("click", () => {
   document.getElementById("time2").value = "";
   fetchArticles(1); // 回到默认列表
 });
+
+    </script>
+  </body>
+</html>
 
     </script>
   </body>

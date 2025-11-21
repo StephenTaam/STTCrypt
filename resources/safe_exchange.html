@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<title>STTCrypt 安全协商助手</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<style>
+body {
+  margin:0;
+  padding:0;
+  background:#f3f4f7;
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+  color:#222;
+}
+.container {
+  max-width:880px;
+  margin:40px auto;
+  background:#fff;
+  padding:32px 36px 40px;
+  border-radius:18px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.14);
+}
+h1{text-align:center;font-size:2.2rem;margin:0 0 8px;font-weight:800;}
+.subtitle{text-align:center;color:#666;margin-bottom:18px;font-size:.95rem;}
+
+h2{
+  margin-top:24px;margin-bottom:10px;
+  font-size:1.2rem;border-left:4px solid #4a90e2;
+  padding-left:8px;color:#333;
+}
+
+textarea,input[type="text"],input[type="password"]{
+  width:100%;padding:10px 12px;
+  border-radius:10px;border:1px solid #ccc;
+  font-size:0.95rem;outline:none;resize:vertical;
+}
+textarea:focus,input:focus{
+  border-color:#4a90e2;
+  box-shadow:0 0 0 2px rgba(74,144,226,0.2);
+}
+
+button{
+  padding:8px 18px;border:none;border-radius:10px;
+  background:#4a90e2;color:#fff;font-size:.9rem;
+  cursor:pointer;margin:6px 8px 0 0;
+  box-shadow:0 4px 10px rgba(74,144,226,0.35);
+}
+button:hover{background:#357ab7;}
+
+.small-hint{font-size:.8rem;color:#777;margin-top:4px;}
+.section-card{
+  padding:14px 16px 16px;
+  margin-top:10px;
+  border-radius:12px;
+  background:#fafafa;
+  border:1px solid #e0e3ee;
+}
+.badge{
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:0.75rem;
+  background:#e6f2ff;
+  color:#2c63b8;
+  margin-left:6px;
+}
+.code-area{
+  font-family:SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+}
+.footer-link{
+  text-align:center;
+  margin-top:24px;
+  font-size:0.9rem;
+}
+.footer-link a{
+  color:#4a90e2;
+  text-decoration:underline;
+}
+.warning{
+  color:#e67e22;
+  font-size:0.8rem;
+  margin-top:6px;
+}
+.success{
+  color:#27ae60;
+  font-size:0.9rem;
+  margin-top:6px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>安全协商模式</h1>
+<div class="subtitle">
+没有办法在保密的渠道传输密码？<br/>
+比如，不方便在不安全的聊天软件里直接说密码？<br/>
+别担心，这个页面可以帮你和对方一起“拼”出同一个安全密码。
+</div>
+
+<div class="section-card">
+  <strong>使用前说明（你和朋友都需要看一眼）：</strong>
+  <ul style="margin:6px 0 4px 18px;padding:0;font-size:0.85rem;color:#555;">
+    <li>你和朋友 <b>各自</b> 打开这个页面（一人一份）。</li>
+    <li>你们各自点一次“生成我的分享码”，并把自己的那串码发给对方。</li>
+    <li>然后把对方给你的那串码贴进下面，电脑会自动算出一个<strong>共同密码</strong>。</li>
+    <li>整个过程，你们只在不安全的渠道分享“分享码”，不直接发真正的密码。</li>
+  </ul>
+</div>
+
+<!-- 步骤 1：生成自己的分享码 -->
+<h2>步骤 1：生成你的分享码 <span class="badge">先点这个</span></h2>
+<div class="section-card">
+  <p style="font-size:0.9rem;margin:0 0 6px;">
+    点下面的按钮，电脑会为你生成一段“分享码”。这串码可以放心发给朋友。
+  </p>
+  <button id="btn_gen_my_code">生成我的分享码</button>
+  <button id="btn_copy_my_code" disabled>复制我的分享码</button>
+  <textarea id="my_code" class="code-area" rows="3" readonly placeholder="这里会出现你的分享码（发给朋友）"></textarea>
+  <div class="small-hint">
+    提示：复制这串内容，通过聊天软件发给对方。
+  </div>
+  <div id="my_code_status" class="small-hint"></div>
+</div>
+
+<!-- 步骤 2：填入对方的分享码 -->
+<h2>步骤 2：填入对方给你的分享码</h2>
+<div class="section-card">
+  <p style="font-size:0.9rem;margin:0 0 6px;">
+    现在，让对方也在他的页面上打开本页面，点击“生成我的分享码”，再把<b>他的</b>那串分享码发给你。
+  </p>
+  <textarea id="friend_code" class="code-area" rows="3" placeholder="把对方给你的那串分享码粘贴到这里（完整粘贴）"></textarea>
+  <div class="small-hint">
+    一定要完整粘贴，不要多删少删任何字符。
+  </div>
+</div>
+
+<!-- 步骤 3：生成共同密码 -->
+<h2>步骤 3：生成你们双方共同使用的密码</h2>
+<div class="section-card">
+  <p style="font-size:0.9rem;margin:0 0 6px;">
+    当你完成前两步后，点击下面的按钮，电脑会自动为你们算出一串<strong>共同密码</strong>。
+    你和对方在各自的页面里，按相同步骤操作，算出来的结果会是<b>一样的</b>。
+  </p>
+  <button id="btn_gen_shared_pwd">生成双方共同密码</button>
+  <div id="shared_status" class="small-hint"></div>
+
+  <label style="margin-top:8px;display:block;font-size:0.9rem;">共同密码（是强密码）（记得保存）：</label>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+    <input type="text" id="shared_pwd" readonly placeholder="先点上面的“生成双方共同密码”" />
+    <button id="btn_copy_shared_pwd" disabled>复制密码</button>
+  </div>
+  <div class="small-hint">
+    下一步：回到 <b>STTCrypt Web</b>页面，把这串密码粘贴到“密码”输入框里，用它来加密/解密文本或文件。<br/>
+    对方也在自己的页面上做同样的操作，就可以加密/解密你发给 TA 的数据。
+  </div>
+</div>
+
+<!-- 附加功能：只想要一个随机强密码 -->
+<h2>额外：不需要协商？但需要一个随机强密码？</h2>
+<div class="section-card">
+  <p style="font-size:0.9rem;margin:0 0 6px;">
+    如果你只想自己用，或者你们有办法安全地把密码告诉对方（当面、手写纸条等），可以直接点这里生成一个随机超强密码。
+  </p>
+  <button id="btn_gen_random_solo">生成随机强密码</button>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+    <input type="text" id="solo_pwd" readonly placeholder="点击“生成随机强密码”" />
+    <button id="btn_copy_solo_pwd" disabled>复制密码</button>
+  </div>
+  <div class="small-hint">
+    这个随机密码和STTCrypt Web页面里的“骰子按钮”作用类似，只是放在这里备用。
+  </div>
+</div>
+
+<div class="footer-link">
+  <a href="AES-256-GCM.html">← 返回 STTCrypt Web 主页面</a>
+</div>
+
+<script>
+// 工具：字节 <-> Base64
+function bytesToBase64(bytes){
+  let bin = "";
+  for(let i=0;i<bytes.length;i++){
+    bin += String.fromCharCode(bytes[i]);
+  }
+  return btoa(bin);
+}
+function base64UrlToBytes(b64url){
+  // 去掉空白
+  b64url = b64url.replace(/\s+/g,"");
+
+  // Base64URL → Base64
+  let b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
+
+  // 补齐末尾的 '='
+  const pad = b64.length % 4;
+  if (pad > 0) {
+    b64 += "=".repeat(4 - pad);
+  }
+
+  // 现在可以安全解码
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) {
+    out[i] = bin.charCodeAt(i);
+  }
+  return out;
+}
+
+// URL 安全一点的 Base64（去掉+/=）
+function bytesToBase64Url(bytes){
+  return bytesToBase64(bytes)
+    .replace(/\+/g,"-")
+    .replace(/\//g,"_")
+    .replace(/=+$/,"");
+}
+
+// 随机强密码（给“额外”功能用）
+function generateStrongPassword(len = 20){
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{};:,.<>?/|~";
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  let pwd = "";
+  for(let i=0;i<len;i++){
+    pwd += charset[arr[i] % charset.length];
+  }
+  return pwd;
+}
+
+// ECDH 相关
+let myKeyPair = null; // 本地保存自己的密钥对（只存在于内存）
+
+async function generateMyCode(){
+  const statusEl = document.getElementById("my_code_status");
+  statusEl.textContent = "正在生成，请稍等...";
+  statusEl.style.color = "#555";
+
+  if(!crypto.subtle){
+    statusEl.textContent = "当前浏览器不支持高级加密功能，请换用现代浏览器（Chrome / Edge / Firefox 等）。";
+    statusEl.style.color = "#e74c3c";
+    return;
+  }
+
+  try{
+    // 生成 ECDH 密钥对（P-256）
+    const keyPair = await crypto.subtle.generateKey(
+      { name:"ECDH", namedCurve:"P-256" },
+      true,  // 可导出公钥
+      ["deriveBits"]
+    );
+    myKeyPair = keyPair;
+
+    // 导出公钥为 raw bytes
+    const rawPub = await crypto.subtle.exportKey("raw", keyPair.publicKey);
+    const pubBytes = new Uint8Array(rawPub);
+    const pubB64  = bytesToBase64Url(pubBytes);
+
+    const myCodeEl = document.getElementById("my_code");
+    myCodeEl.value = pubB64;
+
+    const copyBtn = document.getElementById("btn_copy_my_code");
+    copyBtn.disabled = false;
+
+    statusEl.textContent = "已生成。把上面的分享码发给对方，对方也要在自己的电脑上生成并发送给你。";
+    statusEl.style.color = "#27ae60";
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = "生成失败：" + e.message;
+    statusEl.style.color = "#e74c3c";
+  }
+}
+
+async function generateSharedPassword(){
+  const statusEl = document.getElementById("shared_status");
+  const friendCodeEl = document.getElementById("friend_code");
+  const outEl = document.getElementById("shared_pwd");
+  const copyBtn = document.getElementById("btn_copy_shared_pwd");
+
+  statusEl.textContent = "";
+  statusEl.style.color = "#555";
+  outEl.value = "";
+  copyBtn.disabled = true;
+
+  if(!myKeyPair){
+    statusEl.textContent = "请先在步骤 1 中点击“生成我的分享码”。";
+    statusEl.style.color = "#e67e22";
+    return;
+  }
+  const friendCode = friendCodeEl.value.trim();
+  if(!friendCode){
+    statusEl.textContent = "请先把对方给你的那串分享码粘贴到上面的输入框。";
+    statusEl.style.color = "#e67e22";
+    return;
+  }
+
+  try{
+    const friendBytes = base64UrlToBytes(friendCode);
+
+    const friendKey = await crypto.subtle.importKey(
+      "raw",
+      friendBytes,
+      { name:"ECDH", namedCurve:"P-256" },
+      false,
+      []
+    );
+
+    // 计算共享秘密（双方都会算出同一个）
+    const sharedBits = await crypto.subtle.deriveBits(
+      {
+        name:"ECDH",
+        public: friendKey
+      },
+      myKeyPair.privateKey,
+      256
+    );
+
+    // 再做一次 SHA-256，变成更规整的随机串
+    const digest = await crypto.subtle.digest("SHA-256", sharedBits);
+    const digestBytes = new Uint8Array(digest);
+    const pwd = bytesToBase64Url(digestBytes).slice(0, 40); // 截取 40 个字符，已经非常强
+
+    outEl.value = pwd;
+    copyBtn.disabled = false;
+
+    statusEl.textContent = "已生成双方共同密码。你和对方按相同步骤操作，得到的结果会是一样的。";
+    statusEl.style.color = "#27ae60";
+  }catch(e){
+    console.error(e);
+    statusEl.textContent = "生成失败，请确认对方的分享码粘贴完整无误。错误信息：" + e.message;
+    statusEl.style.color = "#e74c3c";
+  }
+}
+
+// 复制工具
+function copyTextFromElement(id, statusElId){
+  const el = document.getElementById(id);
+  const text = el.value;
+  const statusEl = statusElId ? document.getElementById(statusElId) : null;
+  if(!text){
+    if(statusEl){
+      statusEl.textContent = "没有内容可以复制。";
+      statusEl.style.color = "#e67e22";
+    }else{
+      alert("没有内容可以复制。");
+    }
+    return;
+  }
+  navigator.clipboard.writeText(text).then(()=>{
+    if(statusEl){
+      statusEl.textContent = "已复制到剪贴板，可以粘贴给对方。";
+      statusEl.style.color = "#27ae60";
+    }else{
+      alert("已复制到剪贴板。");
+    }
+  }).catch(err=>{
+    console.error(err);
+    if(statusEl){
+      statusEl.textContent = "复制失败，请手动选中后按 Ctrl+C 复制。";
+      statusEl.style.color = "#e74c3c";
+    }else{
+      alert("复制失败，请手动选择再复制。");
+    }
+  });
+}
+
+// 初始绑定
+document.getElementById("btn_gen_my_code").onclick = generateMyCode;
+document.getElementById("btn_copy_my_code").onclick = () => copyTextFromElement("my_code","my_code_status");
+
+document.getElementById("btn_gen_shared_pwd").onclick = generateSharedPassword;
+document.getElementById("btn_copy_shared_pwd").onclick = () => {
+  copyTextFromElement("shared_pwd","shared_status");
+};
+
+// 额外：随机强密码
+document.getElementById("btn_gen_random_solo").onclick = () => {
+  const pwd = generateStrongPassword(24);
+  const el = document.getElementById("solo_pwd");
+  const copyBtn = document.getElementById("btn_copy_solo_pwd");
+  el.value = pwd;
+  copyBtn.disabled = false;
+};
+document.getElementById("btn_copy_solo_pwd").onclick = () => {
+  copyTextFromElement("solo_pwd");
+};
+</script>
+
+</div>
+</body>
+</html>

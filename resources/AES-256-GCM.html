@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8"/>
+<title>STTCrypt Web</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<style>
+body {
+  margin:0;
+  padding:0;
+  background:#f3f4f7;
+  font-family:"Segoe UI","Microsoft YaHei",sans-serif;
+  color:#222;
+}
+.container {
+  max-width:880px;
+  margin:40px auto;
+  background:#fff;
+  padding:32px 36px 40px;
+  border-radius:18px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.14);
+}
+h1{text-align:center;font-size:2.4rem;margin:0 0 8px;font-weight:800;}
+.subtitle{text-align:center;color:#666;margin-bottom:20px;font-size:.95rem;}
+
+h2{
+  margin-top:26px;margin-bottom:12px;
+  font-size:1.4rem;border-left:4px solid #4a90e2;
+  padding-left:8px;color:#333;
+}
+
+textarea,input[type="text"],input[type="password"]{
+  width:100%;padding:10px 12px;
+  border-radius:10px;border:1px solid #ccc;
+  font-size:1rem;outline:none;resize:vertical;
+}
+textarea:focus,input:focus{
+  border-color:#4a90e2;
+  box-shadow:0 0 0 2px rgba(74,144,226,0.2);
+}
+
+button{
+  padding:10px 22px;border:none;border-radius:10px;
+  background:#4a90e2;color:#fff;font-size:.95rem;
+  cursor:pointer;margin:6px 8px 0 0;
+  box-shadow:0 4px 12px rgba(74,144,226,0.45);
+}
+button:hover{background:#357ab7;}
+
+.file-box{
+  padding:14px 16px 18px;background:#fafafa;
+  border-radius:12px;border:1px solid #ddd;margin-top:6px;
+}
+label{display:block;margin-top:8px;margin-bottom:4px;font-size:.9rem;color:#444;}
+.small-hint{font-size:.8rem;color:#888;margin-top:2px;}
+
+/* 新增：密码行布局 + 小按钮样式 */
+.pwd-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.pwd-row input[type="password"],
+.pwd-row input[type="text"]{
+  flex:1;
+}
+.icon-btn{
+  padding:8px 10px;
+  border-radius:8px;
+  background:#e5e8f0;
+  color:#333;
+  font-size:.85rem;
+  box-shadow:none;
+  min-width:40px;
+}
+.icon-btn:hover{
+  background:#d0d5e5;
+}
+
+/* 新增：密码强度显示 */
+.pwd-strength{
+  font-size:.8rem;
+  margin-top:4px;
+}
+
+/* 新增：进度条 */
+.progress-box{
+  margin-top:24px;
+  padding:12px 14px;
+  border-radius:10px;
+  background:#f7f8fb;
+  border:1px solid #d8ddef;
+  display:none;
+}
+.progress-label{
+  font-size:.85rem;
+  margin-bottom:6px;
+  color:#555;
+}
+.progress-bar{
+  width:100%;
+  height:8px;
+  border-radius:999px;
+  background:#e0e4f0;
+  overflow:hidden;
+}
+.progress-inner{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#4a90e2,#27ae60);
+  transition:width .18s linear;
+}
+</style>
+
+</head>
+<body>
+<div class="container">
+
+<h1>STTCrypt Web</h1>
+<div class="subtitle">
+STTCrypt数据加密平台:把信息安全重新掌握在自己手里。
+</div>
+
+<!-- 文本 -->
+<h2>🔐 文本加密 / 解密</h2>
+
+<label>输入明文（加密）或 Base64 密文（解密）</label>
+<textarea id="text_in" rows="5"></textarea>
+
+<label>密码：</label>
+<div class="pwd-row">
+  <input type="password" id="pwd_text"/>
+  <button type="button" class="icon-btn btn-toggle-pwd" data-target="pwd_text">👁</button>
+  <button type="button" class="icon-btn" id="gen_pwd_text">🎲</button>
+</div>
+<div class="pwd-strength" id="pwd_text_strength"></div>
+
+<div style="margin-top:8px;">
+  <button id="btn_text_enc">加密文本</button>
+  <button id="btn_text_dec">解密文本</button>
+</div>
+
+<label style="margin-top:12px;">输出：</label>
+<textarea id="text_out" rows="5" readonly></textarea>
+
+
+<!-- 文件 -->
+<h2>🗂 文件加密 / 解密</h2>
+
+<div class="file-box">
+
+  <label>选择文件：</label>
+  <input type="file" id="file_in"/>
+
+  <label>密码：</label>
+  <div class="pwd-row">
+    <input type="password" id="pwd_file"/>
+    <button type="button" class="icon-btn btn-toggle-pwd" data-target="pwd_file">👁</button>
+    <button type="button" class="icon-btn" id="gen_pwd_file">🎲</button>
+  </div>
+  <div class="pwd-strength" id="pwd_file_strength"></div>
+
+  <label>保存文件名（可选）：</label>
+  <input type="text" id="file_out_name" placeholder="留空则默认用原文件名"/>
+  <div class="small-hint">
+    加密后的文件名可以任意、有无后缀都可以；解密时会根据原文件类型自动补后缀。
+  </div>
+
+  <div style="margin-top:8px;">
+    <button id="btn_file_enc">加密文件</button>
+    <button id="btn_file_dec">解密文件</button>
+  </div>
+</div>
+
+<!-- 新增：统一的进度显示区域 -->
+<div id="progress_box" class="progress-box">
+  <div id="progress_label" class="progress-label">处理中...</div>
+  <div class="progress-bar">
+    <div id="progress_inner" class="progress-inner"></div>
+  </div>
+</div>
+
+<div style="margin-top:6px;font-size:0.85rem;color:#555;">
+    无法通过安全保密渠道和对方确定密码？
+    <a href="safe_exchange.html" style="color:#4a90e2;text-decoration:underline;" target="_blank">
+      点这里使用“安全协商模式”（一步一步教你和对方一起生成密码）
+    </a>
+  </div>
+
+</div>
+
+<script>
+// ============================
+// 常量（与 C++ 完全一致）
+// ============================
+const SALT_LEN = 16;
+const IV_LEN   = 12;
+const TAG_LEN  = 16;
+const PBKDF2_ITERS = 200000;
+
+
+// ============================
+// Base64 工具（用于文本模式）
+// ============================
+function bytesToBase64(bytes){
+  let bin="";
+  for(let i=0;i<bytes.length;i++)
+    bin+=String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+function base64ToBytes(b64){
+  b64=b64.replace(/\s+/g,"");
+  const bin=atob(b64);
+  const len=bin.length;
+  const out=new Uint8Array(len);
+  for(let i=0;i<len;i++) out[i]=bin.charCodeAt(i);
+  return out;
+}
+
+
+// ============================
+// KDF: PBKDF2-SHA256
+// ============================
+async function deriveKey(password,salt){
+  const enc=new TextEncoder();
+  const keyMaterial=await crypto.subtle.importKey(
+    "raw",enc.encode(password),{name:"PBKDF2"},false,["deriveBits"]
+  );
+
+  const bits=await crypto.subtle.deriveBits(
+    {
+      name:"PBKDF2",
+      salt:salt,
+      iterations:PBKDF2_ITERS,
+      hash:"SHA-256"
+    },
+    keyMaterial,
+    256
+  );
+  return new Uint8Array(bits);
+}
+
+async function importAesKey(rawBytes){
+  return crypto.subtle.importKey("raw",rawBytes,{name:"AES-GCM"},false,["encrypt","decrypt"]);
+}
+
+
+// ============================
+// 新增：密码强度检测
+// ============================
+function getPasswordStrength(pwd){
+  if(!pwd) return {level:"empty", color:"#888", text:""};
+  let score = 0;
+  if(pwd.length >= 8)  score++;
+  if(pwd.length >= 12) score++;
+  if(pwd.length >= 16) score++;
+  if(/[a-z]/.test(pwd) && /[A-Z]/.test(pwd)) score++;
+  if(/\d/.test(pwd)) score++;
+  if(/[^A-Za-z0-9]/.test(pwd)) score++;
+  if(pwd.length >= 20) score++;
+
+  let level, color, text;
+  if(score <= 2){
+    level = "weak";
+    color = "#e74c3c"; // 红
+    text  = "弱";
+  }else if(score <= 4){
+    level = "medium";
+    color = "#f1c40f"; // 黄
+    text  = "中";
+  }else{
+    level = "strong";
+    color = "#27ae60"; // 绿
+    text  = "强";
+  }
+  return {level, color, text};
+}
+
+function updateStrength(inputId, strengthId){
+  const pwd = document.getElementById(inputId).value;
+  const el  = document.getElementById(strengthId);
+  const s   = getPasswordStrength(pwd);
+  if(!pwd){
+    el.textContent = "";
+    el.style.color = "#888";
+    return;
+  }
+  el.textContent = "密码强度：" + s.text;
+  el.style.color = s.color;
+}
+
+// 绑定输入事件
+document.addEventListener("DOMContentLoaded", () => {
+  const pwdText = document.getElementById("pwd_text");
+  const pwdFile = document.getElementById("pwd_file");
+  if(pwdText){
+    pwdText.addEventListener("input", () => updateStrength("pwd_text","pwd_text_strength"));
+  }
+  if(pwdFile){
+    pwdFile.addEventListener("input", () => updateStrength("pwd_file","pwd_file_strength"));
+  }
+});
+
+// ============================
+// 新增：密码显示 / 隐藏切换
+// ============================
+function togglePasswordVisibility(inputId){
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  input.type = (input.type === "password") ? "text" : "password";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".btn-toggle-pwd").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.getAttribute("data-target");
+      togglePasswordVisibility(target);
+    });
+  });
+});
+
+// ============================
+// 新增：随机强密码生成
+// ============================
+function generateStrongPassword(len = 20){
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{};:,.<>?/|~";
+  const arr = new Uint32Array(len);
+  crypto.getRandomValues(arr);
+  let pwd = "";
+  for(let i=0;i<len;i++){
+    pwd += charset[arr[i] % charset.length];
+  }
+  return pwd;
+}
+
+function applyGeneratedPassword(inputId, strengthId){
+  const pwd = generateStrongPassword(20);
+  const input = document.getElementById(inputId);
+  input.value = pwd;
+  updateStrength(inputId, strengthId);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const genText = document.getElementById("gen_pwd_text");
+  const genFile = document.getElementById("gen_pwd_file");
+  if(genText){
+    genText.addEventListener("click", () => {
+      applyGeneratedPassword("pwd_text","pwd_text_strength");
+    });
+  }
+  if(genFile){
+    genFile.addEventListener("click", () => {
+      applyGeneratedPassword("pwd_file","pwd_file_strength");
+    });
+  }
+});
+
+
+// ============================
+// 新增：进度显示（模拟进度）
+// ============================
+let progressTimer = null;
+let progressValue = 0;
+
+function showProgress(label){
+  const box   = document.getElementById("progress_box");
+  const labEl = document.getElementById("progress_label");
+  const inner = document.getElementById("progress_inner");
+  if(!box || !labEl || !inner) return;
+
+  labEl.textContent = label || "处理中...";
+  box.style.display = "block";
+  progressValue = 0;
+  inner.style.width = "0%";
+
+  if(progressTimer){
+    clearInterval(progressTimer);
+    progressTimer = null;
+  }
+  // 简单模拟：每 150ms 增加 4%，最多到 90%
+  progressTimer = setInterval(() => {
+    if(progressValue < 90){
+      progressValue += 4;
+      inner.style.width = progressValue + "%";
+    }
+  }, 150);
+}
+
+function completeProgress(){
+  const box   = document.getElementById("progress_box");
+  const inner = document.getElementById("progress_inner");
+  if(!box || !inner) return;
+
+  if(progressTimer){
+    clearInterval(progressTimer);
+    progressTimer = null;
+  }
+  progressValue = 100;
+  inner.style.width = "100%";
+  // 稍微停一下再隐藏
+  setTimeout(() => {
+    box.style.display = "none";
+    inner.style.width = "0%";
+    progressValue = 0;
+  }, 400);
+}
+
+function resetProgressOnError(){
+  const box   = document.getElementById("progress_box");
+  const inner = document.getElementById("progress_inner");
+  if(!box || !inner) return;
+
+  if(progressTimer){
+    clearInterval(progressTimer);
+    progressTimer = null;
+  }
+  box.style.display = "none";
+  inner.style.width = "0%";
+  progressValue = 0;
+}
+
+
+// ============================
+// 文本加密（salt|iv|tag|ciphertext → Base64）
+// ============================
+async function encryptText(plain,password){
+  const enc=new TextEncoder();
+  const plainBytes=enc.encode(plain);
+
+  const salt=crypto.getRandomValues(new Uint8Array(SALT_LEN));
+  const iv  =crypto.getRandomValues(new Uint8Array(IV_LEN));
+  const keyBytes=await deriveKey(password,salt);
+  const aesKey=await importAesKey(keyBytes);
+
+  const encrypted=await crypto.subtle.encrypt(
+    {name:"AES-GCM",iv},
+    aesKey,
+    plainBytes
+  );
+
+  // WebCrypto 输出: ciphertext||tag（tag 在末尾）
+  const outAll=new Uint8Array(encrypted);
+  const ciphertext = outAll.slice(0,outAll.length - TAG_LEN);
+  const tag        = outAll.slice(outAll.length - TAG_LEN);
+
+  // 文本格式约定：salt | iv | tag | ciphertext
+  const out=new Uint8Array(SALT_LEN + IV_LEN + TAG_LEN + ciphertext.length);
+  let o=0;
+  out.set(salt,o); o+=SALT_LEN;
+  out.set(iv,o);   o+=IV_LEN;
+  out.set(tag,o);  o+=TAG_LEN;
+  out.set(ciphertext,o);
+
+  return bytesToBase64(out);
+}
+
+
+// ============================
+// 文本解密（salt|iv|tag|ciphertext Base64）
+// ============================
+async function decryptText(b64,password){
+  const all=base64ToBytes(b64);
+
+  if(all.length < SALT_LEN+IV_LEN+TAG_LEN)
+    throw new Error("密文过短");
+
+  let o=0;
+  const salt=all.slice(o,o+SALT_LEN); o+=SALT_LEN;
+  const iv  =all.slice(o,o+IV_LEN);   o+=IV_LEN;
+  const tag =all.slice(o,o+TAG_LEN);  o+=TAG_LEN;
+
+  const ciphertext=all.slice(o);
+
+  // 还原成 WebCrypto 需要的 ciphertext||tag
+  const combined=new Uint8Array(ciphertext.length + TAG_LEN);
+  combined.set(ciphertext,0);
+  combined.set(tag,ciphertext.length);
+
+  const keyBytes=await deriveKey(password,salt);
+  const aesKey =await importAesKey(keyBytes);
+
+  const plainBuf=await crypto.subtle.decrypt(
+    {name:"AES-GCM",iv},
+    aesKey,
+    combined
+  );
+  return new TextDecoder().decode(plainBuf);
+}
+
+
+// ============================
+// 文件加密（salt|iv|ciphertext|tag，与 C++ 文件一致）
+// ============================
+async function encryptFileBytes(bytes, password) {
+  const salt = crypto.getRandomValues(new Uint8Array(SALT_LEN));
+  const iv   = crypto.getRandomValues(new Uint8Array(IV_LEN));
+  const keyBytes = await deriveKey(password, salt);
+  const aesKey   = await importAesKey(keyBytes);
+
+  // WebCrypto：ciphertext||tag
+  const encrypted = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    aesKey,
+    bytes
+  );
+  const encAll = new Uint8Array(encrypted); // [ciphertext || tag]
+
+  // C++ 文件格式：salt | iv | ciphertext | tag
+  const out = new Uint8Array(SALT_LEN + IV_LEN + encAll.length);
+  let o = 0;
+  out.set(salt, o); o += SALT_LEN;
+  out.set(iv,   o); o += IV_LEN;
+  out.set(encAll, o);
+
+  return out;
+}
+
+
+// ============================
+// 文件解密（与 C++ 文件格式互通）
+// ============================
+async function decryptFileBytes(all, password) {
+  if (all.length < SALT_LEN + IV_LEN + TAG_LEN) {
+    throw new Error("文件不完整");
+  }
+
+  let o = 0;
+  const salt = all.slice(o, o + SALT_LEN); o += SALT_LEN;
+  const iv   = all.slice(o, o + IV_LEN);   o += IV_LEN;
+
+  // 剩下的是 ciphertext | tag
+  const encAll = all.slice(o);
+  if (encAll.length < TAG_LEN) {
+    throw new Error("文件不完整");
+  }
+
+  const cipherLen  = encAll.length - TAG_LEN;
+  const ciphertext = encAll.slice(0, cipherLen);
+  const tag        = encAll.slice(cipherLen);
+
+  // 还原为 WebCrypto 需要的格式：ciphertext||tag
+  const combined = new Uint8Array(ciphertext.length + TAG_LEN);
+  combined.set(ciphertext, 0);
+  combined.set(tag, ciphertext.length);
+
+  const keyBytes = await deriveKey(password, salt);
+  const aesKey   = await importAesKey(keyBytes);
+
+  const plainBuf = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    aesKey,
+    combined
+  );
+  return new Uint8Array(plainBuf);
+}
+
+
+// ============================
+// 根据文件魔数猜后缀（自动类型识别）
+// ============================
+function detectFileExtension(bytes) {
+  const len = bytes.length;
+  const b = (i) => (i < len ? bytes[i] : 0);
+
+  // PNG
+  if (len >= 8 &&
+      b(0) === 0x89 && b(1) === 0x50 && b(2) === 0x4E && b(3) === 0x47 &&
+      b(4) === 0x0D && b(5) === 0x0A && b(6) === 0x1A && b(7) === 0x0A) {
+    return ".png";
+  }
+
+  // JPEG
+  if (len >= 3 && b(0) === 0xFF && b(1) === 0xD8 && b(2) === 0xFF) {
+    return ".jpg";
+  }
+
+  // GIF
+  if (len >= 4 &&
+      b(0) === 0x47 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x38) {
+    return ".gif";
+  }
+
+  // PDF
+  if (len >= 4 &&
+      b(0) === 0x25 && b(1) === 0x50 && b(2) === 0x44 && b(3) === 0x46) { // %PDF
+    return ".pdf";
+  }
+
+  // ZIP / Office / JAR 等（统一当 zip）
+  if (len >= 4 &&
+      b(0) === 0x50 && b(1) === 0x4B &&
+      (b(2) === 0x03 || b(2) === 0x05 || b(2) === 0x07) &&
+      (b(3) === 0x04 || b(3) === 0x06 || b(3) === 0x08)) {
+    return ".zip";
+  }
+
+  // RAR
+  if (len >= 7 &&
+      b(0) === 0x52 && b(1) === 0x61 && b(2) === 0x72 &&
+      b(3) === 0x21 && b(4) === 0x1A && b(5) === 0x07) {
+    return ".rar";
+  }
+
+  // 7z
+  if (len >= 6 &&
+      b(0) === 0x37 && b(1) === 0x7A && b(2) === 0xBC &&
+      b(3) === 0xAF && b(4) === 0x27 && b(5) === 0x1C) {
+    return ".7z";
+  }
+
+  // MP4 / MOV (ftyp)
+  if (len >= 12 &&
+      b(4) === 0x66 && b(5) === 0x74 && b(6) === 0x79 && b(7) === 0x70) {
+    return ".mp4";
+  }
+
+  // WebM / Matroska
+  if (len >= 4 &&
+      b(0) === 0x1A && b(1) === 0x45 && b(2) === 0xDF && b(3) === 0xA3) {
+    return ".mkv";
+  }
+
+  // RIFF 容器（WAV/WEBP/AVI）
+  if (len >= 12 &&
+      b(0) === 0x52 && b(1) === 0x49 && b(2) === 0x46 && b(3) === 0x46) { // 'RIFF'
+    // WAVE
+    if (b(8) === 0x57 && b(9) === 0x41 && b(10) === 0x56 && b(11) === 0x45) {
+      return ".wav";
+    }
+    // WEBP
+    if (b(8) === 0x57 && b(9) === 0x45 && b(10) === 0x42 && b(11) === 0x50) {
+      return ".webp";
+    }
+    // 其他 RIFF，当 .avi 处理
+    return ".avi";
+  }
+
+  // MP3 (简单判断：ID3 tag)
+  if (len >= 3 && b(0) === 0x49 && b(1) === 0x44 && b(2) === 0x33) {
+    return ".mp3";
+  }
+
+  // OGG
+  if (len >= 4 &&
+      b(0) === 0x4F && b(1) === 0x67 && b(2) === 0x67 && b(3) === 0x53) {
+    return ".ogg";
+  }
+
+  // 文本文件（简单判断：前若干字节都是可打印 ASCII）
+  const sample = Math.min(len, 256);
+  let textLike = true;
+  for (let i = 0; i < sample; i++) {
+    const c = bytes[i];
+    // 允许：\n \r \t 以及 0x20~0x7E 普通 ASCII
+    if (c === 0x09 || c === 0x0A || c === 0x0D) continue;
+    if (c < 0x20 || c > 0x7E) { textLike = false; break; }
+  }
+  if (textLike) {
+    return ".txt";
+  }
+
+  // 实在识别不了就当 .bin
+  return ".bin";
+}
+
+
+// ============================
+// 文本按钮事件
+// ============================
+document.getElementById("btn_text_enc").onclick=async()=>{
+  const plain=document.getElementById("text_in").value;
+  const pwd  =document.getElementById("pwd_text").value;
+  if(!pwd){ alert("请输入密码"); return; }
+
+  try{
+    showProgress("正在加密文本...");
+    const b64=await encryptText(plain,pwd);
+    document.getElementById("text_out").value=b64;
+    completeProgress();
+  }catch(e){
+    resetProgressOnError();
+    alert("加密失败："+e.message);
+  }
+};
+
+document.getElementById("btn_text_dec").onclick=async()=>{
+  const b64=document.getElementById("text_in").value;
+  const pwd=document.getElementById("pwd_text").value;
+  if(!pwd){ alert("请输入密码"); return; }
+
+  try{
+    const plain=await decryptText(b64,pwd);
+    document.getElementById("text_out").value=plain;
+  }catch(e){
+    alert("解密失败："+e.message);
+  }
+};
+
+
+// ============================
+// 文件按钮事件
+// ============================
+document.getElementById("btn_file_enc").onclick=async()=>{
+  const f=document.getElementById("file_in").files[0];
+  const pwd=document.getElementById("pwd_file").value;
+  const outNameInput = document.getElementById("file_out_name").value.trim();
+
+  if(!f){ alert("请选择文件"); return; }
+  if(!pwd){ alert("请输入密码"); return; }
+
+  try {
+    showProgress("正在加密文件...");
+    const buf=new Uint8Array(await f.arrayBuffer());
+    const out=await encryptFileBytes(buf,pwd);
+
+    const a=document.createElement("a");
+    const blob = new Blob([out],{type:"application/octet-stream"});
+    a.href=URL.createObjectURL(blob);
+
+    // 加密输出文件名：
+    // 1. 若用户指定，则用用户给的
+    // 2. 否则用原文件名（不强制加 .enc，你可自己改名/去掉后缀）
+    let name = outNameInput || f.name;
+    if (!name) name = "encrypted.bin";
+
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    completeProgress();
+  } catch (e) {
+    console.error(e);
+    resetProgressOnError();
+    alert("文件加密失败：" + e.message);
+  }
+};
+
+document.getElementById("btn_file_dec").onclick = async () => {
+  const f = document.getElementById("file_in").files[0];
+  const pwd = document.getElementById("pwd_file").value;
+  const outNameInput = document.getElementById("file_out_name").value.trim();
+
+  if (!f) return alert("请选择加密后的文件");
+  if (!pwd) return alert("请输入密码");
+
+  try {
+    const all = new Uint8Array(await f.arrayBuffer());
+    const plainBytes = await decryptFileBytes(all, pwd);
+
+    // 1. 根据内容自动识别后缀（魔数）
+    const ext = detectFileExtension(plainBytes);
+
+    // 2. 基础文件名：
+    //    - 若用户指定，则用用户给的（不含后缀时再加 ext）
+    //    - 否则取输入文件名去掉 .enc / 其它尾缀
+    let base;
+    if (outNameInput) {
+      // 用户写的如果已经带后缀，就直接用；否则后面加 ext
+      const hasDot = outNameInput.lastIndexOf(".") > 0;
+      base = outNameInput;
+      if (!hasDot) {
+        base = outNameInput; // 后面再拼 ext
+      }
+    } else {
+      // 用输入文件名做基名
+      base = f.name.replace(/(\.enc)$/i, "");
+      if (!base) base = "output";
+    }
+
+    // 如果用户给的名字没有后缀，就拼上自动识别出来的 ext
+    if (!/\.[^\.]+$/.test(base)) {
+      base = base + ext;
+    }
+
+    const blob = new Blob([plainBytes], { type: "application/octet-stream" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = base;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch (e) {
+    console.error(e);
+    alert("解密失败：" + e.message);
+  }
+};
+
+</script>
+</body>
+</html>

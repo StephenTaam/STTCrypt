@@ -112,7 +112,29 @@ label{display:block;margin-top:8px;margin-bottom:4px;font-size:.9rem;color:#444;
   background:linear-gradient(90deg,#4a90e2,#27ae60);
   transition:width .18s linear;
 }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 60px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+}
 </style>
+
+<div id="toast" class="toast">复制成功</div>
+
 
 </head>
 <body>
@@ -144,6 +166,14 @@ label{display:block;margin-top:8px;margin-bottom:4px;font-size:.9rem;color:#444;
 
 <label style="margin-top:12px;">输出：</label>
 <textarea id="text_out" rows="5" onclick="this.select()"></textarea>
+<label style="margin-top:12px;">输出：</label>
+<div style="position: relative;">
+    <textarea id="text_out" rows="5" readonly onclick="this.select()"></textarea>
+    <button id="btn_copy" type="button" class="icon-btn"
+            style="position:absolute; right:4px; bottom:4px; padding:6px 10px;">
+        复制
+    </button>
+</div>
 
 
 
@@ -193,6 +223,31 @@ label{display:block;margin-top:8px;margin-bottom:4px;font-size:.9rem;color:#444;
 </div>
 
 <script>
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 1500);
+}
+
+document.getElementById("btn_copy").onclick = async () => {
+    const text = document.getElementById("text_out").value;
+    if (!text) {
+        showToast("没有可复制的内容");
+        return;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast("复制成功");
+    } catch (err) {
+        // 部分浏览器不支持 clipboard → 退回手动选中方式
+        const ta = document.getElementById("text_out");
+        ta.select();
+        showToast("已选中，请手动复制");
+    }
+};
+
 // ============================
 // 常量（与 C++ 完全一致）
 // ============================

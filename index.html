@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8" />
-<title>STTCryptWeb — 加密工具</title>
+<title>STTCrypt Web — 私密信息保护工具</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="imags/favicon.png">
 <style>
@@ -14,7 +14,6 @@ body {
   background-size: cover;
   color: #222;
 }
-
 .overlay {
   background: rgba(255,255,255,0.86);
   max-width: 900px;
@@ -23,7 +22,6 @@ body {
   border-radius: 18px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.18);
 }
-
 h1 {
   text-align: center;
   font-size: 2.8rem;
@@ -31,17 +29,14 @@ h1 {
   color: #2a2a2a;
   font-weight: 800;
 }
-
 h2 {
   margin-top: 40px;
   color: #333;
 }
-
 p {
   line-height: 1.8;
   font-size: 1.1rem;
 }
-
 .download-box {
   text-align: center;
   margin: 30px 0;
@@ -61,7 +56,6 @@ p {
   background: #357ab7;
   box-shadow: 0 6px 20px rgba(53,122,183,0.6);
 }
-
 .feature {
   background: #fff;
   padding: 20px 24px;
@@ -72,7 +66,6 @@ p {
 .feature h3 {
   margin-top: 0;
 }
-
 .footer {
   text-align: center;
   margin-top: 40px;
@@ -84,67 +77,86 @@ p {
 <body>
 <div class="overlay">
 
-<h1>STTCrypt Web — 强力加密工具</h1>
+<h1>STTCrypt Web — 私密信息保护工具</h1>
 
 <p>
-STTCrypt 是一个 <b>轻量 / 免安装 / 简洁易用</b> 的个人信息保护工具。
-支持 <b>文本加密解密（Base64）</b> 与 <b>文件加密解密</b>。
-采用 <b>OpenSSL AES‑256‑GCM</b> 算法，安全性达到军事级别。支持在<b>任意平台及离线使用</b>。
+STTCrypt 是一个 <b>轻量、免安装、即开即用</b> 的加密工具，帮助你在任何环境下保护自己的隐私内容。
+<br><br>
+无论你要发送私密信息，保存重要文件，还是只想避免他人误看某些资料，STTCrypt 都能把你的内容变成只有你和对方才能解开的“密文”。即使你的聊天软件、云盘或邮件被别人获取，也无法查看内容。
 </p>
 
-
 <div class="download-box">
-  <a class="download-btn" href="resources/AES-256-GCM.html" target="_blank">🔗 在线 STTCrypt 工具</a>
+  <a class="download-btn" href="resources/AES-256-GCM.html" target="_blank">🔗 在线使用 STTCrypt</a>
 </div>
 
 <div class="download-box">
-  <a class="download-btn" href="resources/STTCrypt_Web.zip" download>📦 下载 离线STTCrypt 工具</a>
+  <a class="download-btn" href="resources/STTCrypt_Web.zip" download>📦 下载离线版本（更安全）</a>
 </div>
 
-<h2>🔐 功能特点</h2>
-<div class="feature"><h3>✔ AES‑256‑GCM</h3><p>当前最强对称加密之一，具备完整性校验（防篡改）。</p></div>
-<div class="feature"><h3>✔ PBKDF2‑SHA256 强化口令</h3><p>自动加盐，多轮迭代，避免暴力破解。</p></div>
-<div class="feature"><h3>✔ 支持文件与文本</h3><p>可对任意简单本文或文件（图片/文档/压缩包等）进行加密。</p></div>
-<div class="feature"><h3>✔ 轻量，无复杂依赖</h3><p>支持任意平台</p></div>
-<div class="feature"><h3>✔ 图形界面</h3><p>界面简洁，简单易用。</p></div>
 
-<h2>🖥️ 软件界面预览</h2>
+<h2>🔒 为什么你需要加密？</h2>
+<div class="feature">
+<h3>✔ 在不完全安全的平台上发送私密信息</h3>
+<p>例如：身份证号、银行资料、工作文件、私人照片等。加密后，即使聊天记录或云盘泄露，也没人能看到内容。</p>
+</div>
+
+<div class="feature">
+<h3>✔ 想把文件存在电脑上，但不希望别人打开</h3>
+<p>把文件加密后保存，别人双击也无法看到内容。</p>
+</div>
+
+<div class="feature">
+<h3>✔ 给朋友传文件，但不放心传输渠道</h3>
+<p>发加密后的文件，对方只需密码就能解密，中间任何人都看不到内容。</p>
+</div>
+
+<div class="feature">
+<h3>✔ 生成强密码、保存重要备份</h3>
+<p>利用 STTCrypt 的本地加密，你可以保存私人备忘、账号密码等敏感内容。</p>
+</div>
+
+
+<h2>🛡️ STTCrypt 的安全性</h2>
+
+<div class="feature"><h3>✔ AES-256-GCM 加密</h3><p>银行、政府、企业使用的标准。内容未经授权无法破解。</p></div>
+
+<div class="feature"><h3>✔ PBKDF2-SHA256 密码强化</h3><p>即使你设置较弱的密码，系统也会自动加强抵抗暴力破解。</p></div>
+
+<div class="feature"><h3>✔ 支持文本与文件</h3><p>可加密任意文本、图片、视频、文档、压缩包等。</p></div>
+
+<div class="feature"><h3>✔ 不上传、不联网</h3><p>离线版本在本地运行，不会将你的内容发送到互联网。</p></div>
+
+
+
+<h2>📸 软件界面</h2>
 <p style="text-align:center;">
   <img src="imags/sttcrypt_web_preview.png" alt="软件界面" style="max-width:100%; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.2);" />
 </p>
 
-<h2>📥 使用说明</h2>
+
+<h2>📘 如何使用</h2>
+
 <p>
-#输入密码 → 输入加密前文本 / 文件 → 点击“加密  即可进行加密”。<br>
- 输入密码 → 输入加密后的文本 / 文件 → 点击“解密  即可进行解密。<br>
-  <br>
-#为了保证不被暴力破解，我们建议您使用16位或以上的密码保证安全。<br>
- 为了保证密码强度，我们也建议您使用一些难以察觉的非常规的组合。<br>
- (推荐）长度 ≥ 16 且包含：大写 + 小写 + 数字 + 特殊符号。<br>
-  您可以通过点击🎲随机生成一个强密码，但要注意保存。<br>
-  <br>
-#如果您需要把加密数据和另一个人分享，但是无法在确保安全私密的渠道和对方分享和确定密码。👇<br>
-  <a href="sources/safe_exchange.html" style="color:#4a90e2;text-decoration:underline;" target="_blank">
-      点这里使用“安全协商模式”（一步一步教你和对方在不信任的渠道下生成和传输密码）
-<br>
+<b>1. 加密</b><br>
+输入密码 → 输入内容或选择文件 → 点击「加密」<br>
+生成的内容可以放心发送给任何人。<br><br>
+
+<b>2. 解密</b><br>
+输入密码 → 输入对方发给你的密文或选择加密文件 → 点击「解密」<br><br>
+
+<b>3. 密码建议</b><br>
+为了安全，推荐使用 16 位以上的密码，可包含大小写字母、数字和符号。你也可以使用 🎲 一键生成强密码。<br><br>
+
+<b>4. 你和对方无法私下安全传密码？</b><br>
+可以使用：<br>
+<a href="sources/safe_exchange.html" style="color:#4a90e2;text-decoration:underline;" target="_blank">
+👉 《安全协商模式》（教你在不安全的聊天环境下，也能和对方生成同一把密码）
+</a>
 </p>
 
-<div class="footer">© 2025 StephenTaam</div>
+
+<div class="footer">© 2025 StephenTaam — Your Privacy, Only Yours.</div>
 
 </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
